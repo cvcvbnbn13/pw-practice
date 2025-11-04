@@ -48,3 +48,58 @@ test("user facing locators", async ({ page }) => {
 
   await page.getByTestId("SignIn").click();
 });
+
+test("locating children", async ({ page }) => {
+  await page.locator('nb-card nb-radio :text-is("Option 1")').click();
+
+  await page
+    .locator("nb-card")
+    .locator("nb-radio")
+    .locator(':text-is("Option 2")')
+    .click();
+
+  await page
+    .locator("nb-card")
+    .getByRole("button", { name: "Sign in" })
+    .first()
+    .click();
+
+  //not command
+  await page.locator("nb-card").nth(3).getByRole("button").click();
+});
+
+test("locating parent", async ({ page }) => {
+  await page
+    .locator("nb-card", { hasText: "Using the Grid" })
+    .getByRole("textbox", { name: "Email" })
+    .first()
+    .click();
+
+  await page
+    .locator("nb-card", { has: page.locator("#inputEmail") })
+    .getByRole("textbox", { name: "Email" })
+    .first()
+    .click();
+
+  await page
+    .locator("nb-card")
+    .filter({ hasText: "Basic Form" })
+    .getByRole("textbox", { name: "Email" })
+    .first()
+    .click();
+
+  await page
+    .locator("nb-card")
+    .filter({ has: page.locator(".status-danger") })
+    .getByRole("textbox", { name: "Email" })
+    .first()
+    .click();
+
+  await page
+    .locator("nb-card")
+    .filter({ has: page.locator("nb-checkbox") })
+    .filter({ hasText: "Sign In" })
+    .getByRole("textbox", { name: "Email" })
+    .first()
+    .click();
+});
