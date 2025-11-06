@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("http://localhost:4200");
@@ -102,4 +102,66 @@ test("locating parent", async ({ page }) => {
     .getByRole("textbox", { name: "Email" })
     .first()
     .click();
+});
+
+test("reusing locator", async ({ page }) => {
+  const basicForm = page.locator("nb-card").filter({ hasText: "Basic Form" });
+  const emailFeild = basicForm.getByRole("textbox", { name: "Email" });
+
+  await emailFeild.fill("test@test.com");
+
+  await basicForm.getByRole("textbox", { name: "Password" }).fill("Welcome123");
+
+  await basicForm.locator("nb-checkbox").click();
+
+  await basicForm.getByRole("button").click();
+
+  await expect(emailFeild).toHaveValue("test@test.com");
+});
+
+test("extracting value", async ({ page }) => {
+  // single text value
+  const basicForm = page.locator("nb-card").filter({ hasText: "Basic Form" });
+
+  const buttonText = await basicForm.locator("button").textContent();
+
+  expect(buttonText).toBe("Submit");
+
+  //all text values
+  const allRadioButtonsLabels = await page
+    .locator("nb-radio")
+    .allTextContents();
+  expect(allRadioButtonsLabels).toContain("Option 1");
+
+  //input value
+  const emailFeild = basicForm.getByRole("textbox", { name: "Email" });
+  await emailFeild.fill("test@test.com");
+  const emailValue = await emailFeild.inputValue();
+
+  expect(emailValue).toBe("test@test.com");
+
+  //attribute value
+  const placeholderValue = await emailFeild.getAttribute("placeholder");
+
+  expect(placeholderValue).toBe("Email");
+});
+
+test("assertions", async ({ page }) => {
+  const basicFormButton = page
+    .locator("nb-card")
+    .filter({ hasText: "Basic Form" })
+    .locator("button");
+  //general assertions
+  const value = 5;
+  expect(value).toEqual(5);
+
+  const text = await basicFormButton.textContent();
+  expect(text).toEqual("Submit");
+
+  //locator assertions
+  await expect(basicFormButton).toHaveText("Submit");
+
+  //soft assertions (test can be continue even if assertion fails)
+  await expect.soft(basicFormButton).toHaveText("Submit12");
+  await basicFormButton.click();
 });
