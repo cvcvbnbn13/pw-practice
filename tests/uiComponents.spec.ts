@@ -50,5 +50,23 @@ test.describe("Form layouts page", () => {
     await expect(usingTheGirdForm.getByLabel("Option 1")).not.toBeChecked();
   });
 
-  test("checkboxes", async ({ page }) => {});
+  // use check and uncheck
+  test("checkboxes", async ({ page }) => {
+    await page.getByText("Modal & Overlays").click();
+    await page.getByText("Toastr").click();
+
+    await page
+      .getByRole("checkbox", { name: "Hide on click" })
+      .uncheck({ force: true });
+    await page
+      .getByRole("checkbox", { name: "Prevent arising of duplicate toast" })
+      .check({ force: true });
+
+    // all checkboxes
+    const allCheckboxes = page.getByRole("checkbox");
+    for (const checkbox of await allCheckboxes.all()) {
+      await checkbox.uncheck({ force: true });
+      expect(await checkbox.isChecked()).toBeFalsy();
+    }
+  });
 });
