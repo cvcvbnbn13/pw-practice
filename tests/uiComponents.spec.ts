@@ -69,4 +69,45 @@ test.describe("Form layouts page", () => {
       expect(await checkbox.isChecked()).toBeFalsy();
     }
   });
+
+  test("list and dropdown", async ({ page }) => {
+    const dropdownMeun = page.locator("ngx-header nb-select");
+    await dropdownMeun.click();
+
+    // when the list has ul element
+    // page.getByRole("list");
+
+    // when the list has li element
+    // page.getByRole("listitem");
+
+    //const otionList = page.getByRole('list').locator('nb-option');
+
+    const optionList = page.locator("nb-option-list nb-option");
+    await expect(optionList).toHaveText([
+      "Light",
+      "Dark",
+      "Cosmic",
+      "Corporate",
+    ]);
+
+    await optionList.filter({ hasText: "Cosmic" }).click();
+    const header = page.locator("nb-layout-header");
+    await expect(header).toHaveCSS("background-color", "rgb(50, 50, 89)");
+
+    const colors = {
+      Light: "rgb(255, 255, 255)",
+      Dark: "rgb(34, 43, 69)",
+      Cosmic: "rgb(50, 50, 89)",
+      Corporate: "rgb(255, 255, 255)",
+    };
+
+    await dropdownMeun.click();
+    for (const color in colors) {
+      await optionList.filter({ hasText: color }).click();
+      await expect(header).toHaveCSS("background-color", colors[color]);
+      if (color !== "Corporate") {
+        await dropdownMeun.click();
+      }
+    }
+  });
 });
